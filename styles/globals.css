@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-tech-orange hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .badge-ai {
+    @apply bg-purple-100 text-purple-800;
+  }
+  
+  .badge-funding {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .badge-product {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .badge-regulation {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .badge-other {
+    @apply bg-gray-100 text-gray-800;
+  }
+} 

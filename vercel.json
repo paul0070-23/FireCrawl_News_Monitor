@@ -1,0 +1,15 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "env": {
+    "FIRECRAWL_API_KEY": "@firecrawl_api_key"
+  },
+  "functions": {
+    "pages/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  }
+} 
