@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 
 export interface Article {
   headline: string;
@@ -11,6 +12,7 @@ export interface ScrapeResponse {
   success: boolean;
   articles?: Article[];
   error?: string;
+  supabaseInserted?: boolean;
 }
 
 export default async function handler(
@@ -22,7 +24,10 @@ export default async function handler(
   }
 
   try {
+    // Check required environment variables
     const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
     
     if (!firecrawlApiKey) {
       return res.status(500).json({ 
@@ -30,6 +35,16 @@ export default async function handler(
         error: 'FireCrawl API key not configured. Please add FIRECRAWL_API_KEY to your environment variables.' 
       });
     }
+
+    if (!supabaseUrl || !supabaseKey) {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Supabase configuration missing. Please add SUPABASE_URL and SUPABASE_KEY to your environment variables.' 
+      });
+    }
+
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // FireCrawl extract endpoint with structured data extraction
     const response = await axios.post(
@@ -112,17 +127,60 @@ Return as a JSON array with objects containing these fields.`,
       }
     }
 
+    // Use mock data if no articles found
+    if (articles.length === 0) {
+      articles = generateMockData();
+    }
+
+    // Insert articles into Supabase
+    let supabaseInserted = false;
+    try {
+      if (articles.length > 0) {
+        const { error: supabaseError } = await supabase
+          .from('news_articles')
+          .insert(
+            articles.map(article => ({
+              title: article.headline,
+              url: 'https://techcrunch.com/', // Placeholder URL
+              topic: article.category,
+              published_date: new Date().toISOString(),
+            }))
+          );
+
+        if (supabaseError) {
+          console.error('Supabase Error:', supabaseError);
+          return res.status(500).json({ 
+            success: false, 
+            error: `Database error: ${supabaseError.message}`,
+            articles 
+          });
+        }
+
+        supabaseInserted = true;
+        console.log(`Successfully inserted ${articles.length} articles into Supabase`);
+      }
+    } catch (supabaseError: any) {
+      console.error('Supabase Error:', supabaseError);
+      return res.status(500).json({ 
+        success: false, 
+        error: `Database connection error: ${supabaseError.message}`,
+        articles 
+      });
+    }
+
     return res.status(200).json({ 
       success: true, 
-      articles: articles.length > 0 ? articles : generateMockData() 
+      articles,
+      supabaseInserted
     });
 
   } catch (error: any) {
-    console.error('FireCrawl API Error:', error.response?.data || error.message);
+    console.error('API Error:', error.response?.data || error.message);
     
-    // Return mock data in case of API failure for demo purposes
-    return res.status(200).json({ 
-      success: true, 
+    // Return mock data in case of API failure but indicate the error
+    return res.status(500).json({ 
+      success: false, 
+      error: `FireCrawl API error: ${error.message}`,
       articles: generateMockData()
     });
   }

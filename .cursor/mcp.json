@@ -1,0 +1,26 @@
+{
+    "mcpServers": {
+      "firecrawl-mcp": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "fc-6fe48fa4d2d14faab33e874f33a9fdbc"
+      }
+    },
+      "supabase-mcp": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@supabase-community/supabase-mcp",
+        "--key",
+        "e544abfc-4ae3-47e3-b8f3-ae3ee71727c6",
+        "--profile",
+        "gentle-urial-vdW52V"
+      ]
+    }
+    }
+  } 
